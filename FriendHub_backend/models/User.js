@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema(
       required: true,
       max: 50,
       unique: true,
+      lowercase: true, // Convert email to lowercase
+      trim: true, // Remove whitespace from the beginning and end of email
     },
     password: {
       type: String,
