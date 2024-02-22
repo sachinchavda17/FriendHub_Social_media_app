@@ -9,9 +9,7 @@ import {
   FormControl,
   useTheme,
   useMediaQuery,
-  mobileStepperClasses,
 } from "@mui/material";
-
 import {
   Search,
   Message,
@@ -22,18 +20,19 @@ import {
   Menu,
   Close,
 } from "@mui/icons-material";
-
-import { UseDispatch, useDispatch, useSelector } from "react-redux";
-import { setMode, setLogout } from "state/state";
+import logo from "./friendHubLogo.png";
+import { useDispatch, useSelector } from "react-redux";
+import { setMode, setLogout } from "../../state/state";
 import { useNavigate } from "react-router-dom";
-import FlexBetween from "components/FlexBetween";
+import FlexBetween from "../../components/FlexBetween";
+
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
-  const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
+  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
 
   const theme = useTheme();
   const neutralLight = theme.palette.neutral.light;
@@ -42,19 +41,16 @@ const Navbar = () => {
   const primaryLight = theme.palette.primary.light;
   const alt = theme.palette.background.alt;
 
-  const fullName =
-    user?.firstName && user?.lastName
-      ? `${user?.firstName} ${user?.lastName}`
-      : "Sachin Chavda";
+  const fullName = `${user.firstName} ${user.lastName}`;
 
   return (
-    <FlexBetween padding={"1rem 6%"} backgroundColor={alt}>
-      <FlexBetween gap={"1.75rem"}>
+    <FlexBetween padding="1rem 6%" backgroundColor={alt}>
+      <FlexBetween gap="1.75rem">
         <Typography
-          fontWeight={"bold"}
-          fontSize={"clamp(1rem , 2rem , 2.25rem )"}
-          color={"primary"}
-          onClick={() => navigate("/home")}
+          fontWeight="bold"
+          fontSize="clamp(1rem, 2rem, 2.25rem)"
+          color="primary"
+          onClick={() => navigate("/")}
           sx={{
             "&:hover": {
               color: primaryLight,
@@ -62,14 +58,17 @@ const Navbar = () => {
             },
           }}
         >
-          FriendsHub
+          <FlexBetween>
+            <img src={logo} alt="" width={40} />
+            <div>FriendsHub</div>
+          </ FlexBetween>
         </Typography>
         {isNonMobileScreens && (
           <FlexBetween
             backgroundColor={neutralLight}
-            borderRadius={"9px"}
-            gap={"3rem"}
-            padding={"0.5rem 1.5rem"}
+            borderRadius="9px"
+            gap="3rem"
+            padding="0.1rem 1.5rem"
           >
             <InputBase placeholder="Search..." />
             <IconButton>
@@ -81,7 +80,7 @@ const Navbar = () => {
 
       {/* DESKTOP NAV */}
       {isNonMobileScreens ? (
-        <FlexBetween gap={"2rem"}>
+        <FlexBetween gap="2rem">
           <IconButton onClick={() => dispatch(setMode())}>
             {theme.palette.mode === "dark" ? (
               <DarkMode sx={{ fontSize: "25px" }} />
@@ -99,10 +98,10 @@ const Navbar = () => {
                 backgroundColor: neutralLight,
                 width: "150px",
                 borderRadius: "0.25rem",
-                p: ".25rem 1rem ",
+                p: "0.25rem 1rem",
                 "& .MuiSvgIcon-root": {
-                  pr: ".25rem ",
-                  width: "3rem ",
+                  pr: "0.25rem",
+                  width: "3rem",
                 },
                 "& .MuiSelect-select:focus": {
                   backgroundColor: neutralLight,
@@ -113,7 +112,7 @@ const Navbar = () => {
               <MenuItem value={fullName}>
                 <Typography>{fullName}</Typography>
               </MenuItem>
-              <MenuItem onClick={() => dispatch(setLogout())}>Logout</MenuItem>
+              <MenuItem onClick={() => dispatch(setLogout())}>Log Out</MenuItem>
             </Select>
           </FormControl>
         </FlexBetween>
@@ -128,17 +127,17 @@ const Navbar = () => {
       {/* MOBILE NAV */}
       {!isNonMobileScreens && isMobileMenuToggled && (
         <Box
-          position={"fixed"}
-          right={"0"}
-          bottom={"0"}
-          height={"100%"}
-          zIndex={"10"}
-          maxWidth={"500px"}
-          minWidth={"300px"}
+          position="fixed"
+          right="0"
+          bottom="0"
+          height="100%"
+          zIndex="10"
+          maxWidth="500px"
+          minWidth="300px"
           backgroundColor={background}
         >
           {/* CLOSE ICON */}
-          <Box display={"flex"} justifyContent={"flex-end"} p="1rem ">
+          <Box display="flex" justifyContent="flex-end" p="1rem">
             <IconButton
               onClick={() => setIsMobileMenuToggled(!isMobileMenuToggled)}
             >
@@ -146,13 +145,13 @@ const Navbar = () => {
             </IconButton>
           </Box>
 
-          {/* Menu Items */}
+          {/* MENU ITEMS */}
           <FlexBetween
-            gap={"3rem"}
-            display={"flex"}
-            flexDirection={"column"}
-            justifyContent={"center"}
-            alignItems={"center"}
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            gap="3rem"
           >
             <IconButton
               onClick={() => dispatch(setMode())}
@@ -174,10 +173,10 @@ const Navbar = () => {
                   backgroundColor: neutralLight,
                   width: "150px",
                   borderRadius: "0.25rem",
-                  p: ".25rem 1rem ",
+                  p: "0.25rem 1rem",
                   "& .MuiSvgIcon-root": {
-                    pr: ".25rem ",
-                    width: "3rem ",
+                    pr: "0.25rem",
+                    width: "3rem",
                   },
                   "& .MuiSelect-select:focus": {
                     backgroundColor: neutralLight,
@@ -189,7 +188,7 @@ const Navbar = () => {
                   <Typography>{fullName}</Typography>
                 </MenuItem>
                 <MenuItem onClick={() => dispatch(setLogout())}>
-                  Logout
+                  Log Out
                 </MenuItem>
               </Select>
             </FormControl>

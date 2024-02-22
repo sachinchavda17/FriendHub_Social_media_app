@@ -12,23 +12,23 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setLogin } from "state/state";
 import Dropzone from "react-dropzone";
-import FlexBetween from "components/FlexBetween";
-
+import { setLogin } from "../../state/state";
+import FlexBetween from "../../components/FlexBetween";
+import {backendUrl} from "../../config"
 const registerSchema = yup.object().shape({
-  firstName: yup.string().required("required"),
-  lastName: yup.string().required("required"),
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
-  location: yup.string().required("required"),
-  occupation: yup.string().required("required"),
-  picture: yup.string().required("required"),
+  firstName: yup.string().required("firstname is required"),
+  lastName: yup.string().required("lastname is required"),
+  email: yup.string().email("invalid email").required("email is required"),
+  password: yup.string().required("password is required"),
+  location: yup.string().required("location is required"),
+  occupation: yup.string().required("occupation is required"),
+  picture: yup.string().required(" picture is required"),
 });
 
 const loginSchema = yup.object().shape({
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
+  email: yup.string().email("invalid email!").required("email is required"),
+  password: yup.string().required("password is required"),
 });
 
 const initialValuesRegister = {
@@ -64,7 +64,7 @@ const Form = () => {
     formData.append("picturePath", values.picture.name);
 
     const savedUserResponse = await fetch(
-      "http://localhost:8080/auth/register",
+      `${backendUrl}/auth/register`,
       {
         method: "POST",
         body: formData,
@@ -79,7 +79,7 @@ const Form = () => {
   };
 
   const login = async (values, onSubmitProps) => {
-    const loggedInResponse = await fetch("http://localhost:8080/auth/login", {
+    const loggedInResponse = await fetch(`${backendUrl}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
@@ -93,7 +93,7 @@ const Form = () => {
           token: loggedIn.token,
         })
       );
-      navigate("/home");
+      navigate("/");
     }
   };
 
