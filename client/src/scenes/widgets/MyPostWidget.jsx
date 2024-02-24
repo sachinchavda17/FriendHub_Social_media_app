@@ -23,8 +23,8 @@ import { useDispatch, useSelector } from "react-redux";
 import FlexBetween from "../../components/FlexBetween";
 import UserImage from "../../components/UserImage";
 import WidgetWrapper from "../../components/WidgetWrapper";
-import { setPosts } from "../../state/state"; // Import setPosts action creator
-import { backendUrl } from "../../config";
+import { setPosts } from "../../state/state";
+import { backendUrl, cloudinaryPreset, cloudinaryUrl } from "../../config";
 import axios from "axios";
 
 const MyPostWidget = ({ picturePath }) => {
@@ -43,25 +43,24 @@ const MyPostWidget = ({ picturePath }) => {
     try {
       const formData = new FormData();
       formData.append("file", image);
-      formData.append("upload_preset", "social_media");
+      formData.append("upload_preset", cloudinaryPreset);
       const cloudinaryResponse = await axios.post(
-        "https://api.cloudinary.com/v1_1/dbm00gxt1/image/upload",
+       cloudinaryUrl,
         formData
       );
       const imageUrl = cloudinaryResponse.data.secure_url;
       console.log("imageUrl", imageUrl);
-      // Post data to backend
 
       const response = await axios.post(
         `${backendUrl}/posts`,
         {
-          userId: _id, // Ensure userId is passed correctly
+          userId: _id,
           description: post,
           picturePath: imageUrl,
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Pass authentication token in headers
+            Authorization: `Bearer ${token}`, 
           },
         }
       );

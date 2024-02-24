@@ -15,7 +15,7 @@ import { useDispatch } from "react-redux";
 import Dropzone from "react-dropzone";
 import { setLogin } from "../../state/state";
 import FlexBetween from "../../components/FlexBetween";
-import { backendUrl } from "../../config";
+import { backendUrl, cloudinaryPreset, cloudinaryUrl } from "../../config";
 import axios from "axios";
 
 const registerSchema = yup.object().shape({
@@ -69,9 +69,9 @@ const FormComponent = () => {
     try {
       const formData = new FormData();
       formData.append("file", picturePath);
-      formData.append("upload_preset", "social_media");
+      formData.append("upload_preset", cloudinaryPreset);
       const cloudinaryResponse = await axios.post(
-        "https://api.cloudinary.com/v1_1/dbm00gxt1/image/upload",
+        cloudinaryUrl,
         formData
       );
       const imageUrl = await cloudinaryResponse.data.secure_url;
