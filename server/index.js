@@ -27,6 +27,7 @@ dotenv.config();
 const app = express();
 
 // Middleware
+app.use(express.static(path.resolve(__dirname, 'build')));
 app.use(express.json())
 app.use(cors());
 app.use(helmet());
@@ -69,6 +70,10 @@ import { v2 as cloudinary } from 'cloudinary';
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postsRoutes)
+
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
+});
 
 // Mongoose setup
 const PORT = process.env.PORT || 5000;
