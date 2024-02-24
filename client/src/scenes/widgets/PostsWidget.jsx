@@ -36,11 +36,12 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     } else {
       getPosts();
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
+  console.log(posts)
 
   return (
     <>
-      {posts.map(
+      {posts?.map(
         ({
           _id,
           userId,

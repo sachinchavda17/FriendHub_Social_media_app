@@ -9,7 +9,7 @@ const UserImage = ({ image, size = "60px" }) => {
         width={size}
         height={size}
         alt="user"
-        src={`${backendUrl}/assets/${image}`}
+        src={image}
       />
     </Box>
   );

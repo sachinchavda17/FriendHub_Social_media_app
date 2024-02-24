@@ -10,14 +10,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { register } from "./controllers/auth.js";
 import authRoutes from "./routes/auth.js";
-import userRoutes from "./routes/user.js" 
-import postsRoutes from "./routes/posts.js" 
+import userRoutes from "./routes/user.js"
+import postsRoutes from "./routes/posts.js"
 import { verifyToken } from "./middleware/auth.js";
-import {createPost} from "./controllers/posts.js"
-
+import { createPost } from "./controllers/posts.js"
 import User from "./models/User.js";
 import Post from "./models/Post.js";
-import { users,posts } from "./data/index.js";
+import { users, posts } from "./data/index.js";
 
 
 // Configuration
@@ -33,9 +32,13 @@ app.use(cors());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
-app.use(bodyParser.json({ limit: "30mb" ,  extended: true }));
+app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
-app.use("/assets",express.static(path.join(__dirname, "public/assets")));
+app.use("/assets", express.static(path.join(__dirname, "public/assets")));
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
 
 // Multer Storage Configuration
 const storage = multer.diskStorage({
@@ -49,13 +52,23 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Routes with files
-app.post("/auth/register", upload.single("picture"), register);
-app.post("/posts",verifyToken,upload.single("picture"),createPost)
+app.post("/auth/register", register);
+app.post("/posts", verifyToken,  createPost)
+
+
+
+import { v2 as cloudinary } from 'cloudinary';
+
+
+
+// cloudinary.uploader.upload("https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg",
+//   { public_id: "olympic_flag" },
+//   function(error, result) {console.log(result); });
 
 // Routes
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
-app.use("/posts",postsRoutes)
+app.use("/posts", postsRoutes)
 
 // Mongoose setup
 const PORT = process.env.PORT || 5000;

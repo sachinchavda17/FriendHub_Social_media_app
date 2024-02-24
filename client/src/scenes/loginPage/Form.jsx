@@ -15,20 +15,21 @@ import { useDispatch } from "react-redux";
 import Dropzone from "react-dropzone";
 import { setLogin } from "../../state/state";
 import FlexBetween from "../../components/FlexBetween";
-import {backendUrl} from "../../config"
+import { backendUrl } from "../../config";
+import axios from "axios";
+
 const registerSchema = yup.object().shape({
-  firstName: yup.string().required("firstname is required"),
-  lastName: yup.string().required("lastname is required"),
-  email: yup.string().email("invalid email").required("email is required"),
-  password: yup.string().required("password is required"),
-  location: yup.string().required("location is required"),
-  occupation: yup.string().required("occupation is required"),
-  picture: yup.string().required(" picture is required"),
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
+  password: yup.string().required("Password is required"),
+  location: yup.string().required("Location is required"),
+  occupation: yup.string().required("Occupation is required"),
 });
 
 const loginSchema = yup.object().shape({
-  email: yup.string().email("invalid email!").required("email is required"),
-  password: yup.string().required("password is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
+  password: yup.string().required("Password is required"),
 });
 
 const initialValuesRegister = {
@@ -46,54 +47,76 @@ const initialValuesLogin = {
   password: "",
 };
 
-const Form = () => {
-  const [pageType, setPageType] = useState("login");
+const FormComponent = () => {
+  const [pageType, setPageType] = useState("register");
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const isLogin = pageType === "login";
   const isRegister = pageType === "register";
+  const [picturePath, setPicturePath] = useState("");
+  const [imgName, setImgName] = useState("");
+
+
+  const handleDrop = (acceptedFiles) => {
+    const file = acceptedFiles[0];
+    setPicturePath(file);
+    setImgName(file.name);
+  };
 
   const register = async (values, onSubmitProps) => {
-    // this allows us to send form info with image
-    const formData = new FormData();
-    for (let value in values) {
-      formData.append(value, values[value]);
-    }
-    formData.append("picturePath", values.picture.name);
+    try {
+      const formData = new FormData();
+      formData.append("file", picturePath);
+      formData.append("upload_preset", "social_media");
+      const cloudinaryResponse = await axios.post(
+        "https://api.cloudinary.com/v1_1/dbm00gxt1/image/upload",
+        formData
+      );
+      const imageUrl = await cloudinaryResponse.data.secure_url;
 
-    const savedUserResponse = await fetch(
-      `${backendUrl}/auth/register`,
-      {
-        method: "POST",
-        body: formData,
+      const savedUserResponse = await axios.post(
+        `${backendUrl}/auth/register`,
+        {
+          ...values,
+          picturePath: imageUrl,
+        }
+      );
+      const savedUser = savedUserResponse.data;
+
+      onSubmitProps.resetForm();
+      setPicturePath("");
+      setImgName("");
+
+      if (savedUser) {
+        setPageType("login");
       }
-    );
-    const savedUser = await savedUserResponse.json();
-    onSubmitProps.resetForm();
-
-    if (savedUser) {
-      setPageType("login");
+    } catch (error) {
+      console.error("Error registering user:", error);
     }
   };
 
   const login = async (values, onSubmitProps) => {
-    const loggedInResponse = await fetch(`${backendUrl}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-    const loggedIn = await loggedInResponse.json();
-    onSubmitProps.resetForm();
-    if (loggedIn) {
-      dispatch(
-        setLogin({
-          user: loggedIn.user,
-          token: loggedIn.token,
-        })
-      );
-      navigate("/");
+    try {
+      const loggedInResponse = await fetch(`${backendUrl}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const loggedIn = await loggedInResponse.json();
+      onSubmitProps.resetForm();
+      if (loggedIn) {
+        dispatch(
+          setLogin({
+            user: loggedIn.user,
+            token: loggedIn.token,
+          })
+        );
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Error logging in:", error);
     }
   };
 
@@ -135,9 +158,7 @@ const Form = () => {
                   onChange={handleChange}
                   value={values.firstName}
                   name="firstName"
-                  error={
-                    Boolean(touched.firstName) && Boolean(errors.firstName)
-                  }
+                  error={Boolean(touched.firstName) && Boolean(errors.firstName)}
                   helperText={touched.firstName && errors.firstName}
                   sx={{ gridColumn: "span 2" }}
                 />
@@ -167,9 +188,7 @@ const Form = () => {
                   onChange={handleChange}
                   value={values.occupation}
                   name="occupation"
-                  error={
-                    Boolean(touched.occupation) && Boolean(errors.occupation)
-                  }
+                  error={Boolean(touched.occupation) && Boolean(errors.occupation)}
                   helperText={touched.occupation && errors.occupation}
                   sx={{ gridColumn: "span 4" }}
                 />
@@ -182,9 +201,7 @@ const Form = () => {
                   <Dropzone
                     acceptedFiles=".jpg,.jpeg,.png"
                     multiple={false}
-                    onDrop={(acceptedFiles) =>
-                      setFieldValue("picture", acceptedFiles[0])
-                    }
+                    onDrop={handleDrop}
                   >
                     {({ getRootProps, getInputProps }) => (
                       <Box
@@ -194,11 +211,11 @@ const Form = () => {
                         sx={{ "&:hover": { cursor: "pointer" } }}
                       >
                         <input {...getInputProps()} />
-                        {!values.picture ? (
-                          <p>Add Picture Here</p>
+                        {!imgName ? (
+                          <Typography>Add Picture Here</Typography>
                         ) : (
                           <FlexBetween>
-                            <Typography>{values.picture.name}</Typography>
+                            <Typography>{imgName}</Typography>
                             <EditOutlinedIcon />
                           </FlexBetween>
                         )}
@@ -272,4 +289,49 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default FormComponent;
+
+
+
+
+
+
+
+  // const handlePost = async () => {
+  //   // const formData = new FormData();
+  //   // formData.append("userId", _id);
+  //   // formData.append("description", post);
+  //   // if (image) {
+  //   //   formData.append("picture", image);
+  //   //   formData.append("picturePath", image.name);
+  //   // }
+  //   const formData = new FormData();
+  //   formData.append("file", image);
+  //   formData.append("upload_preset", "social_media");
+  //   const cloudinaryResponse = await axios.post(
+  //     "https://api.cloudinary.com/v1_1/dbm00gxt1/image/upload",
+  //     formData
+  //   );
+  //   const imageUrl = await cloudinaryResponse.data.secure_url;
+  //   console.log(formData);
+  //   console.log({
+  //     userId: _id,
+  //     description: post,
+  //     picturePath: imageUrl,
+  //   });
+
+  //   const response = await fetch(`${backendUrl}/posts`, {
+  //     method: "POST",
+  //     headers: { Authorization: `Bearer ${token}` },
+  //     body: {
+  //       userId: _id,
+  //       description: post,
+  //       picturePath: imageUrl,
+  //     },
+  //   });
+  //   const posts = await response.json();
+  //   console.log(posts);
+  //   dispatch(setPosts({ posts }));
+  //   setImage(null);
+  //   setPost("");
+  // };

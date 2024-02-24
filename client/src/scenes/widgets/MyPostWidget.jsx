@@ -23,8 +23,9 @@ import { useDispatch, useSelector } from "react-redux";
 import FlexBetween from "../../components/FlexBetween";
 import UserImage from "../../components/UserImage";
 import WidgetWrapper from "../../components/WidgetWrapper";
-import state, { setPosts } from "../../state/state";
+import { setPosts } from "../../state/state"; // Import setPosts action creator
 import { backendUrl } from "../../config";
+import axios from "axios";
 
 const MyPostWidget = ({ picturePath }) => {
   const dispatch = useDispatch();
@@ -39,23 +40,43 @@ const MyPostWidget = ({ picturePath }) => {
   const medium = palette.neutral.medium;
 
   const handlePost = async () => {
-    const formData = new FormData();
-    formData.append("userId", _id);
-    formData.append("description", post);
-    if (image) {
-      formData.append("picture", image);
-      formData.append("picturePath", image.name);
-    }
+    try {
+      const formData = new FormData();
+      formData.append("file", image);
+      formData.append("upload_preset", "social_media");
+      const cloudinaryResponse = await axios.post(
+        "https://api.cloudinary.com/v1_1/dbm00gxt1/image/upload",
+        formData
+      );
+      const imageUrl = cloudinaryResponse.data.secure_url;
+      console.log("imageUrl", imageUrl);
+      // Post data to backend
 
-    const response = await fetch(`${backendUrl}/posts`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-    const posts = await response.json();
-    dispatch(setPosts({ posts }));
-    setImage(null);
-    setPost("");
+      const response = await axios.post(
+        `${backendUrl}/posts`,
+        {
+          userId: _id, // Ensure userId is passed correctly
+          description: post,
+          picturePath: imageUrl,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass authentication token in headers
+          },
+        }
+      );
+
+      console.log("response", response);
+      // Update posts in Redux store
+      dispatch(setPosts(response.data));
+
+      // Reset state
+      setPost("");
+      setImage(null);
+      setIsImage(false);
+    } catch (error) {
+      console.error("Error posting:", error);
+    }
   };
 
   return (
@@ -156,6 +177,7 @@ const MyPostWidget = ({ picturePath }) => {
         )}
 
         <Button
+          type="submit"
           disabled={!post}
           onClick={handlePost}
           sx={{

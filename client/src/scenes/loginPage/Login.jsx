@@ -4,6 +4,7 @@ import logo from "../navbar/friendHubLogo.png";
 
 import Form from "./Form";
 import FlexBetween from "../../components/FlexBetween";
+import Testing from "./Testing";
 const LoginPage = () => {
   const theme = useTheme();
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
@@ -34,6 +35,7 @@ const LoginPage = () => {
           Welcome to Socipedia, the Social Media for Sociopaths!
         </Typography>
         <Form />
+        {/* <Testing/> */}
       </Box>
     </Box>
   );
